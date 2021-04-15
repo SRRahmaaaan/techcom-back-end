@@ -53,6 +53,14 @@ client.connect(err => {
             res.send(result.insertedCount > 0)
         })
     })
+    app.get("/orderedService", (req, res) => {
+        const user = req.query.email
+        ordersCollection.find({email:user})
+        .toArray((error, documents) => {
+            res.send(documents)
+        })
+        
+    })
 
     app.post("/addAdmin", (req, res) => {
         const newAdmin = req.body
@@ -66,6 +74,7 @@ client.connect(err => {
 //===================================================PAYMENT ROUTE===================================
 app.post("/payment", (req, res) => {
     const { service, token } = req.body
+    const price = service.content.price
     const idempotencyKey = uuidv4
     return stripe.customers.create({
         email: token.email,
@@ -73,7 +82,7 @@ app.post("/payment", (req, res) => {
     })
     .then(customer => {
         stripe.charges.create({
-            amount: service.price * 100,
+            amount: price * 100,
             currency: "usd",
             customer: customer.id,
             shipping: {

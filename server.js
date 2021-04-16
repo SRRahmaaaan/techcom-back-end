@@ -72,6 +72,13 @@ client.connect(err => {
         })
     })
 
+    app.get("/allReviews", (req, res) => {
+        reviewsCollection.find({})
+        .toArray((error, documents) => {
+            res.send(documents)
+        })
+    })
+
     app.post("/addAdmin", (req, res) => {
         const newAdmin = req.body
         adminCollection.insertOne(newAdmin)

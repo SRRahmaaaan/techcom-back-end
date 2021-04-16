@@ -87,6 +87,14 @@ client.connect(err => {
         })
     })
 
+    app.post("/isAdmin", (req, res) => {
+        const email = req.body.email
+        adminCollection.find({email: email})
+        .toArray((error, documents) => {
+            res.send(documents.length > 0)
+        })
+    })
+
 });
 //===================================================PAYMENT ROUTE===================================
 app.post("/payment", (req, res) => {

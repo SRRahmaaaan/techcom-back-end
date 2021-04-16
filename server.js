@@ -23,7 +23,7 @@ client.connect(err => {
     const adminCollection = client.db("adminDb").collection("admins");
     const ordersCollection = client.db("ordersDb").collection("orders");
     const reviewsCollection = client.db("reviewsDb").collection("reviews");
-
+    // SERVICE RELATED ROUTE
     app.post("/addService", (req, res) => {
         const newService = req.body
         servicesCollection.insertOne(newService)
@@ -31,14 +31,20 @@ client.connect(err => {
             res.send(result.insertedCount > 0)
         })
     })
-
     app.get("/allServices", (req, res) => {
         servicesCollection.find({})
         .toArray((error, documents) => {
             res.send(documents)
         })
     })
-
+    app.delete("/deleteService/:id", (req, res) => {
+        const id = req.params.id
+        servicesCollection.deleteOne({ _id: ObjectId(id) })
+        .then(result => {
+            res.send(result.deletedCount > 0)
+        })
+    })
+    // ORDER RELATED ROUTE
     app.get("/specific/:id", (req, res) => {
         const id = req.params.id
         servicesCollection.find({ _id: ObjectId(id) })
@@ -46,7 +52,6 @@ client.connect(err => {
             res.send(documents[0])
         })
     })
-
     app.post("/customerOrder", (req, res) => {
         const newOrder = req.body
         ordersCollection.insertOne(newOrder)
@@ -54,16 +59,30 @@ client.connect(err => {
             res.send(result.insertedCount > 0)
         })
     })
-
     app.get("/orderedService", (req, res) => {
         const user = req.query.email
         ordersCollection.find({email:user})
         .toArray((error, documents) => {
             res.send(documents)
         })
-        
     })
-
+    app.get("/allOrders", (req, res) => {
+        ordersCollection.find({})
+        .toArray((error, documents) => {
+            res.send(documents)
+        })
+    })
+    app.patch("/update/:id", (req, res) => {
+        ordersCollection.updateOne({ _id: ObjectId(req.params.id) },
+            {
+                $set: {status: req.body.status}
+            }
+        )
+        .then(result => {
+            res.send(result.matchedCount > 0)
+        })
+    })
+    // REVIEW RELATED ROUTE
     app.post("/getReview", (req, res) => {
         const newReview = req.body
         reviewsCollection.insertOne(newReview)
@@ -71,14 +90,13 @@ client.connect(err => {
             res.send(result.insertedCount > 0 )
         })
     })
-
     app.get("/allReviews", (req, res) => {
         reviewsCollection.find({})
         .toArray((error, documents) => {
             res.send(documents)
         })
     })
-
+    // ADMIN RELATED ROUTE
     app.post("/addAdmin", (req, res) => {
         const newAdmin = req.body
         adminCollection.insertOne(newAdmin)
@@ -86,7 +104,6 @@ client.connect(err => {
             res.send(result.insertedCount > 0 )
         })
     })
-
     app.post("/isAdmin", (req, res) => {
         const email = req.body.email
         adminCollection.find({email: email})
@@ -94,13 +111,12 @@ client.connect(err => {
             res.send(documents.length > 0)
         })
     })
-
 });
 //===================================================PAYMENT ROUTE===================================
 app.post("/payment", (req, res) => {
     const { service, token } = req.body
     const price = service.content.price
-    const idempotencyKey = uuidv4
+    const idempotencyKey = uuidv4()
     return stripe.customers.create({
         email: token.email,
         source: token.source

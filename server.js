@@ -19,6 +19,7 @@ app.get("/", (req, res) => {
     res.send("SERVER RUNNING ON PORT 8000")
 })
 client.connect(err => {
+    //  ALL COLLECTIONS 
     const servicesCollection = client.db("servicesDb").collection("services");
     const adminCollection = client.db("adminDb").collection("admins");
     const ordersCollection = client.db("ordersDb").collection("orders");

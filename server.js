@@ -22,6 +22,7 @@ client.connect(err => {
     const servicesCollection = client.db("servicesDb").collection("services");
     const adminCollection = client.db("adminDb").collection("admins");
     const ordersCollection = client.db("ordersDb").collection("orders");
+    const reviewsCollection = client.db("reviewsDb").collection("reviews");
 
     app.post("/addService", (req, res) => {
         const newService = req.body
@@ -53,6 +54,7 @@ client.connect(err => {
             res.send(result.insertedCount > 0)
         })
     })
+
     app.get("/orderedService", (req, res) => {
         const user = req.query.email
         ordersCollection.find({email:user})
@@ -60,6 +62,14 @@ client.connect(err => {
             res.send(documents)
         })
         
+    })
+
+    app.post("/getReview", (req, res) => {
+        const newReview = req.body
+        reviewsCollection.insertOne(newReview)
+        .then(result => {
+            res.send(result.insertedCount > 0 )
+        })
     })
 
     app.post("/addAdmin", (req, res) => {
